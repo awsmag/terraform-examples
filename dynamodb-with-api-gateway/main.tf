@@ -1,17 +1,17 @@
 # Create dynamo db table
 resource "aws_dynamodb_table" "example" {
   name         = "example"
-  hash_key     = var.hash_key
-  range_key    = var.range_key
-  billing_mode = var.billing_mode
+  hash_key     = "id"
+  range_key    = "range"
+  billing_mode = "PAY_PER_REQUEST"
 
   attribute {
-    name = var.hash_key
+    name = "id"
     type = "S"
   }
 
   attribute {
-    name = var.range_key
+    name = "range"
     type = "S"
   }
 }
@@ -92,7 +92,7 @@ resource "aws_api_gateway_integration" "get-example-integration" {
     "application/json" = <<EOF
       {
         "TableName": "${aws_dynamodb_table.example.name}",
-        "KeyConditionExpression": "${var.hash_key} = :val",
+        "KeyConditionExpression": "id = :val",
         "ExpressionAttributeValues": {
           ":val": {
               "S": "$input.params('val')"
@@ -129,7 +129,7 @@ resource "aws_api_gateway_integration_response" "get-example-response" {
       #set($inputRoot = $input.path('$'))
       {
         #foreach($elem in $inputRoot.Items)
-        "${var.hash_key}": "$elem.${var.hash_key}.S",
+        "id": "$elem.id.S",
         #if($foreach.hasNext),#end
         #end
       }
